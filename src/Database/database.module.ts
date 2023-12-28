@@ -10,11 +10,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       useFactory(configService: ConfigService) {
         return {
           type: 'postgres',
-          host: configService.get('DB_HOST') || 'localhost',
-          port: parseInt(configService.get('DB_PORT'), 10) || 5432,
-          username: configService.get('DB_USERNAME') || 'postgres',
-          password: configService.get('SUPABASE_PASSWORD') || 'postgres',
-          database: configService.get('DB_DATABASE') || 'postgres',
+          host: configService.get<string>('DB_HOST') || 'localhost',
+          port: configService.get<number>('DB_PORT') || 5432,
+          username: configService.get<string>('DB_USERNAME') || 'postgres',
+          password: configService.get<string>('DB_PASSWORD') || 'postgres',
+          database: configService.get<string>('DB_DATABASE') || 'postgres',
           entities: [__dirname + '/../**/*.entity.{js,ts}'],
           synchronize: true,
         };
