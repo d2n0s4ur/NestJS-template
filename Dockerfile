@@ -1,34 +1,23 @@
-FROM node:18-alpine AS base
-
-# INSTALL DEPENDENCIES FOR DEVELOPMENT (FOR NEST)
-FROM base AS deps
+FROM node:21 As development
 WORKDIR /usr/src/app
 
-COPY --chown=node:node package.json yarn.lock ./
-RUN yarn --frozen-lockfile;
-
-USER node
-
-# INSTALL DEPENDENCIES & BUILD FOR PRODUCTION
-FROM base AS build
-WORKDIR /usr/src/app
-
-COPY --chown=node:node --from=deps /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node . .
+COPY package*.json ./
+RUN SHARP_IGNORE_GLOBAL_LIBVIPS=1 npm_config_arch=x64 npm_config_platform=linux yarn add sharp@0.32.6
+RUN yarn install --check-files
+COPY . .
 
 RUN yarn build
 
-ENV NODE_ENV production
-RUN yarn --frozen-lockfile --production;
-RUN rm -rf ./.next/cache
-
-USER node
-
-# PRODUCTION IMAGE
-FROM base AS production
+FROM node:21-alpine as production
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 WORKDIR /usr/src/app
 
-COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node --from=build /usr/src/app/dist ./dist
+COPY package*.json ./
+RUN yarn install --only=production
+COPY . .
+COPY --from=development /usr/src/app/dist ./dist
 
-CMD [ "node", "dist/src/main.js" ]
+EXPOSE 3000
+
+CMD ["yarn", "start:prod"]

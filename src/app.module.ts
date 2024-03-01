@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './Database/database.module';
+import { CommonModule } from './common/common.module';
+import { CoreModule } from './core/core.module';
 
 @Module({
   imports: [
@@ -10,6 +12,8 @@ import { DatabaseModule } from './Database/database.module';
       isGlobal: true,
     }),
     DatabaseModule,
+    CommonModule,
+    CoreModule,
   ],
   controllers: [AppController],
 })
